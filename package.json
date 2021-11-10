@@ -36,6 +36,7 @@
   ],
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run assets",
+    "build:watch": "onchange -i src --await-write-finish 400 -- npm run build",
     "docs": "documentation readme src --resolve=node --pe ts --re ts --re d.ts --github --section=API --markdown-toc-max-depth=2",
     "test": "jest",
     "cov": "jest --coverage",
@@ -51,7 +52,7 @@
     "lint:fix": "npm run lint -- --fix",
     "fmt": "prettier --write src",
     "clean": "rimraf dist",
-    "assets": "cp -R src/public/client.ts src/public/index.html dist/cjs/public/ && cp -R src/public/client.ts src/public/index.html dist/esm/public/",
+    "assets": "rimraf dist/cjs/public && rimraf dist/esm/public && cp -R src/public dist/cjs/ && cp -R src/public dist/esm/",
     "prepack": "npm run clean && npm run build",
     "prepack:dry": "npm pack --dry-run",
     "prepare": "husky install"
