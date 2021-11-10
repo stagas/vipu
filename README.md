@@ -89,20 +89,20 @@ export type Client = typeof client
 
 ### vipu
 
-[src/index.ts:44-163](https://github.com/stagas/vipu/blob/7c9900766ad373d78e7517fce9518586559e53d3/src/index.ts#L44-L163 "Source code on GitHub")
+[src/index.ts:47-164](https://github.com/stagas/vipu/blob/50b0eddf5a60ee6cf2c9d65a4b5eae301c44e4c0/src/index.ts#L47-L164 "Source code on GitHub")
 
 Creates a vipu instance.
 
 #### Parameters
 
 *   `entry` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** Entry file. Must be a full path, which can be obtained using `require.resolve()`. It can be anything Vite supports, .ts, .tsx work as well.
-*   `config` **Config** Configuration. See [Config](Config). (optional, default `{}`)
+*   `config` **Config** Configuration. (optional, default `{}`)
 
     *   `config.rpc`  Passed to AliceBob [`agents`](https://github.com/stagas/alice-bob/#agents). (optional, default `{}`)
     *   `config.vite`  Vite configuration. Passed to vite [`createServer`](https://vitejs.dev/guide/api-javascript.html#createserver). (optional, default `{}`)
     *   `config.puppeteer`  Puppeteer launch configuration. Passed to [`puppeteer.launch`](https://pptr.dev/#?product=Puppeteer\&version=v11.0.0\&show=api-puppeteerlaunchoptions). (optional, default `{}`)
     *   `config.info`  Whether to display info messages in console. (optional, default `true`)
-    *   `config.log`  Log function that can be overriden. (optional, default `(...args:unknown[])=>info&&console.log(chalk.blueBright('[vipu]'),...args)`)
+    *   `config.log`  Log function that can be overriden. (optional, default `vipuLog`)
 
 ## Contribute
 
