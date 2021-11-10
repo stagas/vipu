@@ -5,7 +5,6 @@
   "description": "run things in vite headless with node/puppeteer and alice-bob typed rpc",
   "version": "0.0.1",
   "license": "MIT",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://git@github.com:stagas/vipu.git"
