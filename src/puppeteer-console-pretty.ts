@@ -36,10 +36,10 @@ export function puppeteerConsolePretty(page: Page) {
   page.on('requestfailed', request => {
     const failure = request.failure()
     console.error(
-      chalk.redBright(`Request failed: ${request.method()} ${request.url()}`)
+      chalk.redBright(`Request failed: ${request.method()} ${request.url()}`),
     )
     console.error(
-      chalk.gray(`  ${failure ? failure.errorText : 'Unknown error'}`)
+      chalk.gray(`  ${failure ? failure.errorText : 'Unknown error'}`),
     )
   })
 
@@ -48,10 +48,20 @@ export function puppeteerConsolePretty(page: Page) {
     if (response && response.status() >= 400) {
       console.error(
         chalk.redBright(
-          `HTTP ${response.status()} ${request.method()} ${request.url()}`
-        )
+          `HTTP ${response.status()} ${request.method()} ${request.url()}`,
+        ),
       )
     }
+  })
+
+  page.on('error', error => {
+    console.error(chalk.redBright('Page crashed:'))
+    console.error(chalk.redBright(error.message + error.stack))
+  })
+
+  page.on('pageerror', error => {
+    console.error(chalk.redBright('Uncaught exception:'))
+    console.error(chalk.redBright(error.message + error.stack))
   })
 }
 

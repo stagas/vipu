@@ -29,11 +29,14 @@ export interface Config {
   log?: (...args: unknown[]) => void
 }
 
+const vipuLog = (...args: unknown[]) =>
+  console.log(chalk.blueBright('[vipu]'), ...args)
+
 /**
  * Creates a vipu instance.
  *
  * @param entry Entry file. Must be a full path, which can be obtained using `require.resolve()`. It can be anything Vite supports, .ts, .tsx work as well.
- * @param config Configuration. See {@link Config}.
+ * @param config Configuration.
  * @param config.rpc Passed to AliceBob [`agents`](https://github.com/stagas/alice-bob/#agents).
  * @param config.vite Vite configuration. Passed to vite [`createServer`](https://vitejs.dev/guide/api-javascript.html#createserver).
  * @param config.puppeteer Puppeteer launch configuration. Passed to [`puppeteer.launch`](https://pptr.dev/#?product=Puppeteer&version=v11.0.0&show=api-puppeteerlaunchoptions).
@@ -48,11 +51,10 @@ async function vipu<Server, Client>(
     vite: viteConfig = {},
     puppeteer: puppeteerConfig = {},
     info = true,
-    log = (...args: unknown[]) =>
-      info && console.log(chalk.blueBright('[vipu]'), ...args),
+    log = vipuLog,
   }: Config = {},
 ) {
-  log('starting...')
+  info && log('starting...')
 
   rpcConfig = mergeConfig(
     {
@@ -93,7 +95,6 @@ async function vipu<Server, Client>(
         return result
       } catch (error) {
         console.error(error)
-        // return error
       }
     }
 
@@ -129,9 +130,9 @@ async function vipu<Server, Client>(
 
   // logs
   puppeteerConsolePretty(page)
-  page.on('load', () => log('page loaded '.padEnd(65, '─')))
-  page.on('close', () => log(' page closed'.padStart(65, '─')))
-  log('started.')
+  page.on('load', () => info && log('page loaded '.padEnd(65, '─')))
+  page.on('close', () => info && log(' page closed'.padStart(65, '─')))
+  info && log('started.')
   viteDevServer.printUrls()
 
   // TODO: a not very DX friendly way of getting the url of the server i just created..
@@ -150,13 +151,13 @@ async function vipu<Server, Client>(
     browser,
     vite: viteDevServer,
     finish: async () => {
-      log('finishing...')
+      info && log('finishing...')
       // give some time for the ack's
       // TODO: should be handled better
       setTimeout(async () => {
         await browser.close()
         await viteDevServer.close()
-        log('finished.')
+        info && log('finished.')
       }, 150)
     },
   }
