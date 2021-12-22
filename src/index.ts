@@ -29,13 +29,21 @@ export interface Config {
   log?: (...args: unknown[]) => void
 }
 
-const vipuLog = (...args: unknown[]) =>
-  console.log(chalk.blueBright('[vipu]'), ...args)
+export interface Vipu<Server, Client> {
+  page: puppeteer.Page
+  browser: puppeteer.Browser
+  vite: ViteDevServer
+  close: () => Promise<void>
+  server: Agent<Server, Client>
+  client: Agent<Client, Server>
+  ready: () => Promise<void>
+}
+
+const vipuLog = (...args: unknown[]) => console.log(chalk.blueBright('[vipu]'), ...args)
 
 /**
  * Creates a vipu instance.
  *
- * @param entry Entry file. Must be a full path, which can be obtained using `require.resolve()`. It can be anything Vite supports, .ts, .tsx work as well.
  * @param config Configuration.
  * @param config.rpc Passed to AliceBob [`agents`](https://github.com/stagas/alice-bob/#agents).
  * @param config.vite Vite configuration. Passed to vite [`createServer`](https://vitejs.dev/guide/api-javascript.html#createserver).
@@ -44,16 +52,13 @@ const vipuLog = (...args: unknown[]) =>
  * @param config.log Log function that can be overriden.
  * @returns
  */
-async function vipu<Server, Client>(
-  entry: string,
-  {
-    rpc: rpcConfig = {},
-    vite: viteConfig = {},
-    puppeteer: puppeteerConfig = {},
-    info = true,
-    log = vipuLog,
-  }: Config = {},
-) {
+async function vipu<Server extends { ready: () => Promise<void> }, Client>({
+  rpc: rpcConfig = {},
+  vite: viteConfig = {},
+  puppeteer: puppeteerConfig = {},
+  info = true,
+  log = vipuLog,
+}: Config = {}): Promise<Vipu<Server, Client>> {
   info && log('starting...')
 
   rpcConfig = mergeConfig(
@@ -64,23 +69,9 @@ async function vipu<Server, Client>(
     rpcConfig,
   )
 
-  viteConfig = mergeConfig(
-    {
-      root: __dirname + '/public',
-      resolve: {
-        alias: {
-          '/@vipu/client': '/client.ts',
-          '@vipu/entry': entry,
-        },
-      },
-    },
-    viteConfig,
-  )
+  viteConfig = mergeConfig({}, viteConfig)
 
-  const startRpc = async (
-    page: puppeteer.Page,
-    rpcOptions: RpcConfig<unknown, unknown>,
-  ) => {
+  const startRpc = async (page: puppeteer.Page, rpcOptions: RpcConfig<unknown, unknown>) => {
     const [server, client] = new Alice<Server, Client>().agents(
       rpcOptions.server as Partial<Agent<Server, Client>>,
       rpcOptions.client as Partial<Agent<Client, Server>>,
