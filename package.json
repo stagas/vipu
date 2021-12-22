@@ -19,15 +19,13 @@
   "main": "dist/cjs/index.js",
   "exports": {
     ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
-  "targets": {
-    "main": {
-      "context": "node",
-      "engines": {
-        "node": ">=16.0"
+      "import": {
+        "node": "./dist/esm/index.js",
+        "browser": "./dist/esm/client.js"
+      },
+      "require": {
+        "node": "./dist/cjs/index.js",
+        "browser": "./dist/cjs/client.js"
       }
     }
   },
@@ -36,7 +34,7 @@
   ],
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run assets",
-    "build:watch": "onchange -i src --await-write-finish 400 -- npm run build",
+    "build:watch": "onchange -i src --await-write-finish 400 -- npm run prepack",
     "docs": "documentation readme src --resolve=node --pe ts --re ts --re d.ts --github --section=API --markdown-toc-max-depth=2",
     "test": "jest",
     "cov": "jest --coverage",
@@ -52,7 +50,7 @@
     "lint:fix": "npm run lint -- --fix",
     "fmt": "prettier --write src",
     "clean": "rimraf dist",
-    "assets": "rimraf dist/cjs/public && rimraf dist/esm/public && cp -R src/public dist/cjs/ && cp -R src/public dist/esm/",
+    "assets": "rimraf dist/cjs/public && rimraf dist/esm/public && cp -R src/public dist/cjs/ && cp -R src/public dist/esm/ && echo done",
     "prepack": "npm run clean && npm run build",
     "prepack:dry": "npm pack --dry-run",
     "prepare": "husky install"
@@ -63,33 +61,33 @@
     }
   },
   "devDependencies": {
-    "@swc-node/jest": "^1.3.5",
-    "@swc-node/register": "^1.3.7",
+    "@stagas/documentation-fork": "^13.2.5",
+    "@swc-node/jest": "^1.4.3",
+    "@swc-node/register": "^1.4.2",
     "@tsconfig/node16": "^1.0.2",
-    "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.6",
-    "@typescript-eslint/eslint-plugin": "^5.3.0",
-    "@typescript-eslint/parser": "^5.3.0",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^17.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "@typescript-eslint/parser": "^5.8.0",
     "benny": "^3.7.1",
     "benny-ascii-chart-reporter": "^1.0.1",
     "chartscii": "^1.3.2",
-    "documentation": "^13.2.5",
-    "eslint": "^8.1.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-react": "^7.26.1",
+    "eslint": "^8.5.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-react": "^7.27.1",
     "fpick": "^1.1.0",
     "husky": "^7.0.4",
-    "jest": "^27.3.1",
+    "jest": "^27.4.5",
     "onchange": "^7.1.0",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.4"
   },
   "dependencies": {
+    "@stagas/chalk": "^5.0.0",
     "alice-bob": "^1.3.1",
-    "chalk": "^4.1.2",
-    "puppeteer": "^11.0.0",
-    "vite": "^2.6.13"
+    "puppeteer": "^13.0.0",
+    "vite": "^2.7.5"
   }
 }
