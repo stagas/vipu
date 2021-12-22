@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Bob } from 'alice-bob'
 import type { VipuWindowInterface } from '.'
 
@@ -9,4 +10,5 @@ client.deferredSend = () => window.vipuSend
 window.vipu = { client, server }
 
 const ready = () => server.ready()
+
 export { ready }
