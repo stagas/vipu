@@ -148,15 +148,18 @@ async function vipu<Server extends { ready: () => Promise<void> }, Client>({
     page,
     browser,
     vite: viteDevServer,
-    finish: async () => {
-      info && log('finishing...')
+    close: async () => {
+      info && log('closing...')
       // give some time for the ack's
       // TODO: should be handled better
-      setTimeout(async () => {
-        await browser.close()
-        await viteDevServer.close()
-        info && log('finished.')
-      }, 150)
+      return new Promise<void>(resolve =>
+        setTimeout(async () => {
+          await browser.close()
+          await viteDevServer.close()
+          info && log('closed.')
+          resolve()
+        }, 150),
+      )
     },
   }
 }
