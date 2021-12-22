@@ -1,20 +1,22 @@
-import chalk from 'chalk'
-import { createServer, mergeConfig } from 'vite'
+import chalk from '@stagas/chalk'
+import { createServer, mergeConfig, ViteDevServer } from 'vite'
 import puppeteer, { SerializableOrJSHandle } from 'puppeteer'
 import { Alice, Agent, PayloadMethod } from 'alice-bob'
 import type { AddressInfo } from 'net'
 import puppeteerConsolePretty from './puppeteer-console-pretty'
 
-export interface VipuWindowInterface extends Window {
+export interface VipuWindowInterface<Server, Client> extends WindowOrWorkerGlobalScope {
   vipu: {
-    server: Agent<unknown, unknown>
-    client: Agent<unknown, unknown>
+    server: Agent<Server, Client>
+    client: Agent<Client, Server>
   }
-  vipuSend: PayloadMethod<Agent<unknown, unknown>>
-  vipuRpcConfig: RpcConfig<unknown, unknown>
+  vipuSend: PayloadMethod<Agent<Client, Server>>
+  vipuRpcConfig: RpcConfig<Client, Server>
 }
 
-declare const window: VipuWindowInterface
+export const ready = () => undefined
+
+declare const window: VipuWindowInterface<unknown, unknown>
 
 export type RpcConfig<Server, Client> = {
   server?: Partial<Agent<Server, Client>>
@@ -79,22 +81,16 @@ async function vipu<Server extends { ready: () => Promise<void> }, Client>({
 
     server.send = async data => {
       try {
-        const result = await page.evaluate(
-          data => window.vipu.client.receive(data),
-          data as unknown as SerializableOrJSHandle,
-        )
+        const result = await page.evaluate(data => window.vipu.client.receive(data), data as unknown as SerializableOrJSHandle)
         return result
       } catch (error) {
         console.error(error)
       }
     }
 
-    await page.evaluateOnNewDocument(
-      (rpcConfig: RpcConfig<unknown, unknown>) => {
-        window.vipuRpcConfig = rpcConfig
-      },
-      rpcOptions,
-    )
+    await page.evaluateOnNewDocument((rpcConfig: RpcConfig<unknown, unknown>) => {
+      window.vipuRpcConfig = rpcConfig
+    }, rpcOptions)
     await page.exposeFunction('vipuSend', server.receive)
 
     return { server, client }
@@ -114,10 +110,7 @@ async function vipu<Server extends { ready: () => Promise<void> }, Client>({
   }
 
   // start server and puppeteer in parallel
-  const [viteDevServer, { browser, page, rpc }] = await Promise.all([
-    startViteDevServer(),
-    startPuppeteer(),
-  ])
+  const [viteDevServer, { browser, page, rpc }] = await Promise.all([startViteDevServer(), startPuppeteer()])
 
   // logs
   puppeteerConsolePretty(page)
@@ -129,9 +122,7 @@ async function vipu<Server extends { ready: () => Promise<void> }, Client>({
   // TODO: a not very DX friendly way of getting the url of the server i just created..
   // should've been smth like: `httpServer.address().toString()` or `viteDevServer.url`
   const addressInfo = viteDevServer.httpServer!.address() as AddressInfo
-  const url = `${viteDevServer.config.server.https ? 'https' : 'http'}://${
-    addressInfo.address
-  }:${addressInfo.port}`
+  const url = `${viteDevServer.config.server.https ? 'https' : 'http'}://${addressInfo.address}:${addressInfo.port}`
 
   // navigate to the server
   page.goto(url)
