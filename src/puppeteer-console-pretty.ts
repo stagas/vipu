@@ -2,15 +2,17 @@
 
 // TODO: move to an npm package
 
-import chalk from 'chalk'
+import chalk from '@stagas/chalk'
 import type { Page } from 'puppeteer'
 
 export function puppeteerConsolePretty(page: Page) {
   page.on('console', async message => {
     const type = message.type()
+    const text = message.text()
     const messageArgs = message.args()
     const args = await Promise.all(messageArgs.map(arg => arg.jsonValue()))
     messageArgs.forEach(arg => arg.dispose()) // gc
+    if (text.length) args.unshift(text)
 
     if (type === 'clear') {
       return console.clear()
