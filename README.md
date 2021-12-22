@@ -46,26 +46,25 @@ export interface WindowHandle {
   }
 }
 
-vipu<Server, Client>(require.resolve('./client.ts')).then(
-  ({ server, client, page, finish }) => {
-    server.finish = finish
-    server.sayHi = async ({ iam }) => `hello ${iam}`
-    page.on('load', async () => {
-      const result = await client.multiply(3, 4)
-      console.log('from client:', result)
-      // => from client: 12
-    })
-  },
-)
+vipu<Server, Client>().then(({ server, client, page, finish }) => {
+  server.finish = finish
+  server.sayHi = async ({ iam }) => `hello ${iam}`
+  page.on('load', async () => {
+    const result = await client.multiply(3, 4)
+    console.log('from client:', result)
+    // => from client: 12
+  })
+})
 ```
 
 On the client:
 
 ```ts
-import type { WindowHandle } from './index'
-declare const window: WindowHandle
-const server = window.vipu.server
-
+import { ready } from 'vipu'
+import type { VipuWindowInterface } from 'vipu'
+import type { Server } from './server'
+declare const window: VipuWindowInterface<Server, Client>
+export type Client = typeof client
 ;(async () => {
   console.log('from server:', await server.sayHi({ iam: 'The Client' }))
   // => from server: hello The Client
@@ -75,8 +74,7 @@ const client = {
   multiply: async (x: number, y: number) => x * y,
 }
 
-export default client
-export type Client = typeof client
+Object.assign(window.vipu.client, client)
 ```
 
 ## API
@@ -89,20 +87,21 @@ export type Client = typeof client
 
 ### vipu
 
-[src/index.ts:47-164](https://github.com/stagas/vipu/blob/50b0eddf5a60ee6cf2c9d65a4b5eae301c44e4c0/src/index.ts#L47-L164 "Source code on GitHub")
+[src/index.ts:57-156](https://github.com/stagas/vipu/blob/9b8a8ca85198f7978985e4fb45877e85d0f9de33/src/index.ts#L57-L156 "Source code on GitHub")
 
 Creates a vipu instance.
 
 #### Parameters
 
-*   `entry` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** Entry file. Must be a full path, which can be obtained using `require.resolve()`. It can be anything Vite supports, .ts, .tsx work as well.
-*   `config` **Config** Configuration. (optional, default `{}`)
+*   `config` **Config** Configuration.&#x20;(optional, default `{}`)
 
-    *   `config.rpc`  Passed to AliceBob [`agents`](https://github.com/stagas/alice-bob/#agents). (optional, default `{}`)
-    *   `config.vite`  Vite configuration. Passed to vite [`createServer`](https://vitejs.dev/guide/api-javascript.html#createserver). (optional, default `{}`)
-    *   `config.puppeteer`  Puppeteer launch configuration. Passed to [`puppeteer.launch`](https://pptr.dev/#?product=Puppeteer\&version=v11.0.0\&show=api-puppeteerlaunchoptions). (optional, default `{}`)
-    *   `config.info`  Whether to display info messages in console. (optional, default `true`)
-    *   `config.log`  Log function that can be overriden. (optional, default `vipuLog`)
+    *   `config.rpc`  Passed to AliceBob [`agents`](https://github.com/stagas/alice-bob/#agents).&#x20;(optional, default `{}`)
+    *   `config.vite`  Vite configuration. Passed to vite [`createServer`](https://vitejs.dev/guide/api-javascript.html#createserver).&#x20;(optional, default `{}`)
+    *   `config.puppeteer`  Puppeteer launch configuration. Passed to [`puppeteer.launch`](https://pptr.dev/#?product=Puppeteer\&version=v11.0.0\&show=api-puppeteerlaunchoptions).&#x20;(optional, default `{}`)
+    *   `config.info`  Whether to display info messages in console.&#x20;(optional, default `true`)
+    *   `config.log`  Log function that can be overriden.&#x20;(optional, default `vipuLog`)
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<Vipu\<Server, Client>>**&#x20;
 
 ## Contribute
 
