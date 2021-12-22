@@ -136,8 +136,15 @@ async function vipu<Server extends { ready: () => Promise<void> }, Client>({
   // navigate to the server
   page.goto(url)
 
+  // ready hook
+  let resolveReady: () => void
+  const readyPromise = new Promise<void>(resolve => (resolveReady = resolve))
+  rpc.server.ready = async () => resolveReady()
+  const ready = async () => readyPromise
+
   return {
     ...rpc,
+    ready,
     page,
     browser,
     vite: viteDevServer,
